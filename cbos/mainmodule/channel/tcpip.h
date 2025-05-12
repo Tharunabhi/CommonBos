@@ -1,39 +1,35 @@
+#ifndef FCCADDITIONAL_TCPIP_H
+#define FCCADDITIONAL_TCPIP_H
 
-#ifndef TCPSERVER_HPP
-#define TCPSERVER_HPP
-
-#define BUFFER_SIZE 4096
-#define MAX_CLIENTS 25
-
-#include <thread>
-#include <mutex>
-#include <unordered_map>
-#include <functional>
+#include <netinet/in.h>
 #include <string>
+#include <vector>
 
-class TCPServer {
-public:
-    explicit TCPServer(int port);
-    ~TCPServer();
+#define PORT 4444
 
-    void start();
-    void stop();
+using namespace std;
+namespace Tcp{
+    class tcpIp{
+    private:
 
-    void setDataCallback(std::function<std::string(const std::string&)> callback);
 
-private:
-    void runServer();
-    void handleClient(int clientSocket, int clientId);
+    int server_socket, client_socket;
+    struct sockaddr_in server_address, client_address;
+    socklen_t client_address_size = sizeof(client_address);
+    fd_set readfds;
+    vector<int> client_sockets;
 
-    int port_;
-    int serverSocket_;
-    bool running_;
-    std::thread serverThread_;
-    std::mutex clientsMutex_;
-    int nextClientId_;
+    public:
 
-    std::unordered_map<int, std::thread> clientThreads_;
-    std::function<std::string(const std::string&)> dataCallback_;
-};
+    tcpIp();
 
-#endif // TCPSERVER_HPP
+    virtual ~tcpIp();
+
+        void createServer();
+
+        void serverInitialize();
+
+    };
+}
+
+#endif //FCCADDITIONAL_TCPIP_H
