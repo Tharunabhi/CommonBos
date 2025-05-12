@@ -9,8 +9,7 @@ public:
     std::string cbosparse(const char* buffer);
 
 private:
-   std::string generateResponse(const std::string& apiName, const int& version, bool isValid);  // <-- fix here
-   
+    std::string generateResponse(const std::string& apiName, const int& version, bool isValid);
 };
 
-#endif
+#endif // CBOSPARSER_H
