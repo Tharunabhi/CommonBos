@@ -1,22 +1,36 @@
+#include <iostream>      
+#include <thread>        
+#include <chrono>        
+#include <unistd.h>      
+#include "mainmodule/channel/tcpIp.h"          
+#include "mainmodule/channel/amqpPublisher.h"  
 
-#include "mainmodule/channel/tcpip.h"
-#include "mainmodule/parser/cbosparser.h"
-#include <iostream>
-
+using namespace Tcp;                   
 
 int main() {
-    const int PORT = 4444;
+    std::cout << "[INFO] Starting AMQP Publisher (Producer)..." << std::endl;
 
-    TCPServer server(PORT);
+    
 
-    try {
-        server.start();
-        std::cout << "Press Enter to stop the server..." << std::endl;
-        std::cin.get();
-        server.stop();
-    } catch (const std::exception& ex) {
-        std::cerr << "Error: " << ex.what() << std::endl;
-    }
+    std::thread amqpthread([] {                                                 // Create a separate thread for AMQP (RabbitMQ) Publisher
 
-    return 0;
+        amqpPublisher amqpChannel;                                              // Create an instance of AMQP publisher
+
+        amqpChannel.createAmqpChannel("localhost", 5672, "BOSFCC", "BOSDATA");  // Create AMQP channel to communicate with RabbitMQ server
+
+        std::this_thread::sleep_for(std::chrono::seconds(5));                   // Sleep for 5 seconds to allow the AMQP connection to establish properly
+
+        
+        std::string message = "Hello, FCC from CBOS!";                          // Send a test message to RabbitMQ to verify the setup
+
+        amqpChannel.sendDataToFcc(nullptr, message);                            // Send the message
+    });
+
+     
+    tcpIp tcpip;                                                                // Create and start the TCP server to listen for client connections
+    tcpip.createServer();
+
+    std::cout << "[INFO] AMQP Publisher is done!" << std::endl;
+
+    return 0; 
 }
