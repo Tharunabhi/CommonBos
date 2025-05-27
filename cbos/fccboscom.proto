@@ -1,0 +1,586 @@
+syntax = "proto2";
+package fccboscom;
+
+message RoData
+{
+	required uint32 msgid=1;
+	optional uint32 ack=2;		//ACK=0xAA, NACK=0x55, DUPLICATE=0xFF
+	optional uint32 msgRecordId=3;	//For ttReceipt ack this contains delivery id
+	repeated DbConf dbConf=4;		
+	repeated TankStatus tankStatus=5;	
+	repeated PumpStatus pumpStatus=6;	
+	repeated UpsStatus upsStatus=7;		
+	repeated PumpTrxn pumpTrxn=8;		
+	repeated TankInventory tankInventory=9;	
+	repeated TankDelivery tankDelivery=10;	
+	repeated DeliveryReceipt deliveryReceipt=11;
+	repeated AlarmDetails alarmDetails=12;	
+	repeated DayEndDetails dayEndDetails=13;
+	repeated DayEndTotalizer dayEndTotalizer=14;
+	repeated DayEndInventory dayEndInventory=15;
+	repeated ShiftEndDetails shiftEndDetails=16;
+	repeated ShiftEndTotalizer shiftEndTotalizer=17;
+	repeated ShiftEndInventory shiftEndInventory=18; 
+	repeated PumpControl pumpControl=19; 		
+	repeated TankControl tankControl=20;		
+	repeated ProductPriceChange productPriceChange=21;		
+	repeated PriceChangeStatus priceChangeStatus=22;
+	repeated OperationControl operationControl=23;	
+	repeated TrxnMopUpdate trxnMopUpdate=24;	
+	repeated AlarmAck alarmAck=25;			
+	repeated FccOperation fccOperation=26;
+	repeated BosAck bosAck=27;
+	repeated HeartBeat heartBeat=28;		
+	repeated OtherDevice otherDevice=29;
+	repeated DULogs duLogs=30;
+	repeated BOSAlarm bosAlarm=31;
+	repeated FCCDoorStatus fccDoorStatus=32;
+	repeated InterlockStatus interlockStatus=33;
+	repeated DeviceStatus deviceStatus=34;
+	repeated PromotionalMsg promotionalMsg=35;
+}
+
+
+message DbConf{
+ required string tableName=1;
+ repeated DataModule dataModule=2;
+ required uint32 operation=3;
+ // 1 INSERT 
+ // 2 UPDATE
+ // 3 DELETE
+ // 4 DELETE ALL
+ // 5 INTERLOCK UPDATE
+ // 6 ALARM UPDATE
+ // 7 RESTART
+}///msgid=1 //bos -> fcc
+
+message DataModule{
+ required string key=1;
+ required string value=2;
+ required uint32 dataType=3;
+ //1=numeric
+ //2=string
+ //3=varchar
+}
+
+message TankStatus{
+ required uint32 tankId=1;
+ required uint32 tankUid=2;
+ required uint32 tankStatus=3;
+ required float productLevel=4;
+ required float productVolume=5;
+ required float waterLevel=6;
+ required float waterVolume=7;
+ required float temperature=8;
+ required double tcVolume=9;
+ required float ullage=10;
+ optional float density=11;
+ optional float tcDensity=12;
+ optional uint32 lockVal=13;
+}//msgid=2 //fcc -> bos
+
+message PumpStatus{
+ required uint32 pumpId=1;
+ required uint32 pumpUid=2;
+ required uint32 status=3;
+ required uint32 nozzleId=4;
+ required float trxnVolume=5;
+ required float trxnAmount=6;
+ required uint32 lockVal=7;
+ optional uint32 npndStatus=8;	//1 - enabled  2 - disabled
+ optional uint32 motorTimeout=9;
+ optional uint32 pumpType=10;
+ //1 - Tokheim
+ //2 - Gilbarco
+ //3 - Midco
+ //4 - FlowMeter
+ //5 - CNG
+}//msgid=3 //fcc -> bos
+
+message UpsStatus{
+ required uint32 upsId=1;
+ required uint32 upsUid=2;
+ required float inputVtg=3;
+ required float outputVtg=4;
+ required float batteryVtg=5;
+ required float inputFreq=6;
+ required float temperature=7;
+ required string upsStatus=8;
+ //bit 8=utility fail
+ //bit 7=battery low
+ //bit 6=bypass/boost or buck active
+ //bit 5=ups fail
+ //bit 4=standby
+ //bit 3=test in progress
+ //bit 2=shutdown active
+ //bit 1= beeper on
+ //bit 0= ups offline
+ optional float loadPercent=9;
+ optional float batteryPercent=10;
+ optional uint32 inventoryId=11;
+ optional string inventoryTime=12;
+}//msgid=4 //fcc -> bos
+
+message PumpTrxn{
+ required uint32 pumpId=1;
+ required uint32 pumpUid=2;
+ required uint32 nozzleId=3;
+ required uint32 nozzleUid=4;
+ required float trxnVolume=5;
+ required float trxnAmount=6;
+ required float unitRate=7;
+ required double startVolumeTotalizer=8;
+ required double endVolumeTotalizer=9;
+ required uint32 presetType=10;	//0=No preset 1=Amount 2=Volume
+ optional uint32 presetMode=11;
+ optional float presetValue=12;
+ required uint32 trxnId=13;
+ required string trxnStartTime=14;
+ required string trxnEndTime=15;
+ required uint32 dayId=16;
+ required uint32 gradeUid=17;
+ required uint32 pumpMode=18; //0=PreAuthorize 1=PostAuthorize
+ required uint32 shiftId=19;
+ required uint32 dealerShiftId=20;
+ required uint32 mopType=21;  //MOP type have to be defined
+ required double lastTrxnEndVolTotalizer=22;
+ optional float discountRate=23;
+ optional float totalDiscount=24; 
+ optional double presetId=25; 
+}//msgid=5 //fcc -> bos
+
+
+message TankInventory{
+ required uint32 tankId=1;
+ required uint32 tankUid=2;
+ required float productLevel=3;
+ required float waterLevel=4;
+ required float productVolume=5;
+ required float waterVolume=6;
+ required float tcVolume=7;
+ required float ullage=8;
+ required float temperature=9;
+ required uint32 tankStatus=10;
+ optional float productDensity=11;
+ optional float productTcDensity=12;
+ required uint32 inventoryId=13;
+ required string inventoryTime=14;
+ required uint32 inventoryMode=15;	//INTERVAL=0, PRICECHANGE=1, PUMPTRXN=2
+}//msgId=6 //fcc -> bos
+
+message TankDelivery{
+ required uint32 tankId=1;
+ required uint32 tankUid=2;
+ required string startTime=3;
+ required float startProductLevel=4;
+ required float startWaterLevel=5;
+ required float startProductVolume=6;
+ required float startWaterVolume=7;
+ required float startProductTcVolume=8;
+ required float startTemperature=9;
+ optional float startProductDensity=10;
+ optional float startProductTcDensity=11;
+ required string endTime=12;
+ required float endProductLevel=13;
+ required float endWaterLevel=14;
+ required float endProductVolume=15;
+ required float endWaterVolume=16;
+ required float endProductTcVolume=17;
+ required float endTemperature=18;
+ optional float endProductDensity=19;
+ optional float endProductTcDensity=20;
+ required uint32 deliveryId=21;
+ required uint32 atgId=22;
+ required uint32 atgUid=23;
+}//msgId=7 //fcc -> bos
+
+
+message DeliveryReceipt{
+ required uint32 tankUid=1;
+ required uint32 productUid=2;
+ required string supplyPoint=3;
+ required string invoiceNo=4;
+ required string invoiceDateTime=5;
+ required float invoiceQuantity=6;
+ required float invoiceAmount=7;
+ required string truckNo=8;
+ required uint32 compartmentNo=9;
+ required float observedDensity=10;
+ required float invoiceDensity=11;
+ required float observedTemperature=12;
+ required string dataEntryTime=13;
+ required uint32 deliveryId=14;
+}//msgId=8 //bos -> fcc
+
+message AlarmDetails{
+ required uint32 alarmId=1;
+ required uint32 alarmSequenceId=2;
+ required uint32 alarmTrxnCode=3;
+ required uint32 deviceId=4;
+ optional uint32 nozzleId=5;
+ required string dateTime=6;
+ required uint32 alarmState=7;
+ //0=inactive
+ //1=active
+ optional string param1=8;
+ optional string param2=9;
+ optional string param3=10;
+ optional string param4=11;
+ optional string param5=12;
+}//msgId=9 //fcc -> bos
+
+message DayEndDetails{
+ required uint32 dayId=1;
+ optional string openTime=2;
+ optional string closeTime=3;
+ required uint32 status=4;
+//0=close
+//1=open
+}//msgId =10 //fcc -> bos
+
+message DayEndTotalizer {
+ required uint32 dayId=1;
+ required uint32 nozzleUid=2;
+ required double startTotalizer=3;
+ optional double endTotalizer=4;
+ optional double totalSaleVolume=5;
+ required uint32 recordId=6;
+ required uint32 status=7;
+ //1-open 2-close
+}//msgId=11 //fcc -> bos
+
+message DayEndInventory{
+ required uint32 dayId=1;
+ required uint32 tankUid=2;
+ required float startProductLevel=3;
+ required float startWaterLevel=4;
+ required float startProductVolume=5;
+ required float startWaterVolume=6;
+ required float startProductTcVolume=7;
+ required float startTemperature=8;
+ optional float startProductDensity=9;
+ optional float startProductTcDensity=10;
+ required float startUllage=11;
+ optional float endProductLevel=12;
+ optional float endWaterLevel=13;
+ optional float endProductVolume=14;
+ optional float endWaterVolume=15;
+ optional float endProductTcVolume=16;
+ optional float endTemperature=17;
+ optional float endProductDensity=18;
+ optional float endProductTcDensity=19;
+ optional float endUllage=20;
+ optional double totalSaleVolume=21;
+ optional uint32 inventoryId=22;
+ optional uint32 tankStatus=23;
+ required uint32 recordUid=24;
+ required uint32 status=25;
+ //1-open 2-close
+}//msgId=12 //fcc -> bos
+
+message ShiftEndDetails{
+ required uint32 shiftId=1;
+ required uint32 shiftType=2;
+ //1-Normal Shift
+ //2-Dealer Shift
+ required uint32 dayId=3;
+ optional string openTime=4;
+ optional string closeTime=5;
+ required uint32 status=6;
+ //0=close
+ //1=open
+ required uint32 recordUid=7;
+}//msgId=13 //fcc -> bos
+
+message ShiftEndTotalizer{
+ required uint32 shiftId=1;
+ required uint32 shiftType=2;
+ //1-Normal Shift
+ //2-Dealer Shift
+ required uint32 dayId=3;
+ required uint32 recordUid=4;
+ required uint32 nozzleUid=5;
+ required uint32 tankNo=6;
+ required double startTotalizer=7;
+ optional double endTotalizer=8;
+ optional double totalSaleVolume=9;
+ optional uint32 lastTrxnId=10;
+ optional string nozzleStatus=11;
+ required uint32 status=12;
+ //1-open 2-close
+}//msgId=14 //fcc -> bos
+
+message ShiftEndInventory{
+ required uint32 shiftId=1;
+ required uint32 shiftType=2;
+ //1-Normal Shift
+ //2-Dealer Shift
+ required uint32 recordUid=3;
+ required uint32 dayId=4;
+ required uint32 tankUid=5;
+ required float startProductLevel=6;
+ required float startWaterLevel=7;
+ required float startProductVolume=8;
+ required float startWaterVolume=9;
+ required float startProductTcVolume=10;
+ optional float startProductDensity=11;
+ optional float startProductTcDensity=12;
+ required float startUllage=13;
+ required float startTemperature=14;
+ optional float endProductLevel=15;
+ optional float endWaterLevel=16;
+ optional float endProductVolume=17;
+ optional float endWaterVolume=18;
+ optional float endProductTcVolume=19;
+ optional float endProductDensity=20;
+ optional float endProductTcDensity=21;
+ optional float endUllage=22;
+ optional float endTemperature=23;
+ optional double totalSaleVolume=24;
+ optional uint32 inventoryUid=25;
+ optional uint32 tankStatus=26;
+ required uint32 status=27;
+ //1-open 2-close
+}//msgId=15 //fcc -> bos
+
+message PumpControl{
+ required uint32 pumpUid=1;
+ required uint32 nozzleId=2;
+ required uint32 controlId=3;
+ //1-Start
+ //2-Stop
+ //3-Start All
+ //4-Stop All
+ //5-Block
+ //6-UnderMaintenance
+ //7-Active
+ //8-Preset Lock Ack
+ //9-Preset
+ //10-Authorize
+ //11-Pump mode change
+ optional uint32 presetType=4;
+ optional float presetValue=5;
+ optional uint32 presetMop=6;
+ optional uint32 pumpMode=7;
+ optional string presetRefId=8;
+ //0-Pre Authorize
+ //1-Post Authorize
+}//msgId=16 //bos->fcc
+
+message TankControl{
+ required uint32 tankUid=1;
+ required uint32 controlId=2;
+ //1-Active
+ //2-Block
+ //3-UnderMaintenance
+}//msgId=17 //bos->fcc
+
+message ProductPriceChange{
+ required uint32 priceIdentifier=1;
+ required uint32 gradeUid=2;
+ required float gradeRate=3;
+ required string effectiveTime=4;
+ optional string updateTime=5;
+ optional uint32 updateFlag=6; 
+ //1=add
+ //2=update
+ //3=delete
+ optional string updateBy=7;
+ optional string effectiveType=8;
+ //INSTANT
+ //SCHEDULE
+ required string endDatetime=9;
+ optional uint32 flag=10;
+ //1-To update on monolith display
+ //0-Not to update on monolith display
+}//msgId=18 //bos -> fcc
+
+message PriceChangeStatus{
+ required uint32 priceIdentifier=1;
+ required uint32 productId=2;
+ required uint32 status=3;
+ // 0 - Unsuccessful
+ // 1-  Successful
+ required float productNewPrice=4;
+ required string effectiveTime=5;
+ optional uint32 flag=6;
+ //1-Updated on monolith
+ //0-Not updated on monolith
+}//msgId=19 //fcc ->bos
+
+message OperationControl{
+ required uint32 operationControlId=1;
+ //1-Day Start
+ //2-Day End
+ //3-Shift Start
+ //4-Shift End
+ //5-Dealer Shift Start
+ //6-Dealer Shift End
+ //7-Configuration update
+ optional uint32 operationMode=2;
+ //0-No Mode
+ //1-Auto
+ //2-Manual 
+ optional string time=3;
+ optional string configKey=4; 
+ //DATASYNC -> To synch data between FCC and BOS
+ optional string configValue=5;
+ //duration in seconds for DATASYNC key
+}//msgId=20 ///bos->fcc
+
+message TrxnMopUpdate{
+ required uint32 trxnId=1;
+ required uint32 mopType=2;
+ required string updateDate=3;
+ required string updateBy=4;
+}//msgId=21 //bos -> fcc
+
+message AlarmAck{
+ required uint32 recordUid=1;
+ required string ackBy=2;
+ required string ackTime=3;
+}//msgId=22 //bos -> fcc
+
+message FccOperation{
+ required uint32 key=1;
+ //1-Set log level
+ //2-Request FCC version
+ //3-Delete FCC log
+ //4-Data Synch
+ optional string value=2;
+ //For key=1
+ //0-None
+ //1-Fatal
+ //2-Critical
+ //3-Error
+ //4-Warning
+ //5-Notice
+ //6-Information
+ //7-Debug
+ //8-Trace
+}//msgId=23 //fcc->bos and bos->fcc
+
+message BosAck{
+ required uint32 msgId=1;
+ required uint32 recId=2;
+ required uint32 operation=3;
+ //1-insert 2-update
+ }//msgid=24 //bos->fcc
+
+message HeartBeat{
+ required uint32 deviceType=1;
+ //1-BOS
+ required uint32 deviceId=2;
+ optional string timestamp=3;
+ }//msgid=25 //bos->fcc
+ 
+ message OtherDevice{
+ required uint32 deviceType=1;
+ //4-SPD
+ //5-FCC Enclosure lock
+ //24-SMPS
+ //25-SLAVE
+ //7-Monolithic
+ required uint32 deviceId=2;
+ required uint32 status=3;
+ //1-OK/LOCK/ONPOWER/ONLINE ->SPD-OK;FCC Enclosure->LOCK;SMPS->ONPOWER,SLAVE->ONLINE
+ //0-FAIL/OPEN/ONBATTERY/OFFLINE ->SPD->FAIL;FCC Enclosure->OPEN;SMPS->ONBATTERY,SLAVE->OFFLINE
+ optional uint32 swVersion=4;
+ optional uint32 hwVersion=5;
+ optional uint32 trxnCount=6;
+ }//msgid=26 //fcc->bos
+ 
+message DULogs{
+required int32 logId=1;
+required int32 pumpno=2;
+required int32 nozzleno=3;
+required int32 productCode=4;
+required int32 logTranType=5;
+optional string paramDesc1=6;
+optional string param1=7;
+optional string paramDesc2=8;
+optional string param2=9;
+optional string paramDesc3=10;
+optional string param3=11;
+optional string paramDesc4=12;
+optional string param4=13;
+optional string paramDesc5=14;
+optional string param5=15;
+optional string paramDesc6=16;
+optional string param6=17;
+optional string paramDesc7=18;
+optional string param7=19;
+optional string paramDesc8=20;
+optional string param8=21;
+optional string paramDesc9=22;
+optional string param9=23;
+optional string paramDesc10=24;
+optional string param10=25;
+optional string paramDesc11=26;
+optional string param11=27;
+optional string paramDesc12=28;
+optional string param12=29;
+required string createDate=30;
+optional string logDatetime=31;
+optional string logTypeDesc=32;
+
+} //msgid=27 //fcc->bos
+
+message BOSAlarm{
+required uint32 alarmId=1;
+required uint32 deviceId=2;
+required uint32 alarmState=3;
+//0=inactive
+//1=active
+optional string param1=4;
+optional string param2=5;
+optional string param3=6;
+optional string param4=7;
+optional string param5=8;
+
+} //msgid=28 //bos->fcc
+
+message FCCDoorStatus{
+required uint32 status=1;
+//0-Open 1-Close
+required string dateTime=2;
+} //cmd=29  //FCC->BOS
+
+message InterlockStatus{
+required int32 deviceType=1;
+//1=Tank, 2=Pump
+required int32 deviceId=2;
+required int32 interlockType=3;
+//INTERLOCK_TEST - 1
+//INTERLOCK_PRESET - 2
+//INTERLOCK_NPND - 3
+//INTERLOCK_ATG - 4
+//INTERLOCK_WATER_HIGH  5
+//INTERLOCK_PRODUCT_LOW - 6
+//INTERLOCK_TTRECEIPT - 7
+//INTERLOCK_DELIVERY_INPROGRESS - 8
+//INTERLOCK_PUMPLOCK - 9
+//INTERLOCK_PUMPBLOCK - 10
+//INTERLOCK_NOZZLEBLOCK - 11
+//INTERLOCK_PUMPUM - 12
+//INTERLOCK_NOZZLEUM - 13
+//INTERLOCK_TANKBLOCK - 14
+//INTERLOCK_TANKUM - 15
+//INTERLOCK_NOPRICE - 16
+required string dateTime=4;
+optional int32 nozzleId=5;
+}//cmd=30 //FCC->BOS
+
+message DeviceStatus{
+required uint32 deviceType=1;
+//20-tank 21-Pump
+required uint32 deviceId=2;
+optional uint32 nozzleId=3;
+required uint32 status=4;
+//0-offline 1-online
+required string dateTime=5;
+} //cmd=31  //FCC->BOS
+
+message PromotionalMsg{
+required string message=1;
+}//cmd=32  //BOS->FCC
