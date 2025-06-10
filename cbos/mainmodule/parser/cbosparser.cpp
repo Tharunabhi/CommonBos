@@ -620,7 +620,7 @@ std::string handleSetDispenserConfiguration(const json& parsed, int apiVersion) 
         *rodataPump.add_dbconf() = pumpConf;
         success &= serializeAndSendToFcc(rodataPump, "Set_DispenserConfiguration_Pump", apiVersion);
 
-        int fpIndex = fpNo - 1; // since your formula uses (fpNo - 1)
+        int fpIndex = fpNo - 1; 
 
 int nozzleIndex = 1; // Start nozzle index from 1
 
